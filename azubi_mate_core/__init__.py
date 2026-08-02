@@ -5,7 +5,7 @@ Contains shared data types, interfaces, base classes, exceptions, and configurat
 """
 from .models import CoreModel
 from .dto import BaseDTO
-from .interfaces import BaseEngine
+from .interfaces import BaseEngine, BaseRepository
 from .exceptions import (
     AzubiMateException,
     ConfigurationError,
@@ -18,6 +18,7 @@ __all__ = [
     "CoreModel",
     "BaseDTO",
     "BaseEngine",
+    "BaseRepository",
     "AzubiMateException",
     "ConfigurationError",
     "NotFoundError",

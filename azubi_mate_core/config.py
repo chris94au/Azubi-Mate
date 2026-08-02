@@ -8,6 +8,7 @@ class AppConfig(BaseSettings):
     debug: bool = False
     version: str = "0.1.0"
     log_level: str = "INFO"
+    database_path: str = "azubi_mate.db"
     
     model_config = SettingsConfigDict(env_prefix="AZUBI_")
 
