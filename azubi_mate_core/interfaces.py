@@ -1,6 +1,7 @@
 # azubi_mate_core/interfaces.py
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generic, List, Optional, TypeVar
+from .dto import KnowledgeItemDTO, KnowledgeSearchQueryDTO
 
 class BaseEngine(ABC):
     """Base interface for all engines in Azubi-Mate."""
@@ -38,4 +39,27 @@ class BaseRepository(ABC, Generic[T]):
     @abstractmethod
     def delete(self, entity_id: str) -> bool:
         """Deletes an entity by its unique identifier."""
+        pass
+
+class KnowledgeEngineInterface(BaseEngine, ABC):
+    """Interface for the Knowledge Engine."""
+
+    @abstractmethod
+    def add_knowledge(self, item: KnowledgeItemDTO) -> KnowledgeItemDTO:
+        """Adds or updates a knowledge item."""
+        pass
+
+    @abstractmethod
+    def get_knowledge(self, item_id: str) -> Optional[KnowledgeItemDTO]:
+        """Retrieves a knowledge item by ID."""
+        pass
+
+    @abstractmethod
+    def search_knowledge(self, query: KnowledgeSearchQueryDTO) -> List[KnowledgeItemDTO]:
+        """Searches knowledge items based on query and category."""
+        pass
+
+    @abstractmethod
+    def list_knowledge(self) -> List[KnowledgeItemDTO]:
+        """Lists all knowledge items."""
         pass
