@@ -1,47 +1,36 @@
----
-title: Azubi-Mate
-emoji: 🎓
-colorFrom: blue
-colorTo: purple
-sdk: docker
-pinned: false
----
+# Azubi-Mate
 
-# 🎓 Azubi-Mate
+**Azubi-Mate** ist eine KI-gestützte Mobile-App, die Auszubildende während ihrer gesamten Ausbildung als persönlicher Lern- und Arbeitsbegleiter unterstützt.
 
-## Dein KI-gestützter Ausbildungsbegleiter
+## Projektstruktur
+Die Architektur basiert auf einem modularen Core-First-Ansatz. Das wichtigste Modul ist `azubi_mate_core`, welches ausschließlich Datentypen, Interfaces und gemeinsame Utilities bereitstellt.
 
-Azubi-Mate ist eine modulare KI-Anwendung, die Auszubildende während ihrer gesamten Ausbildung unterstützt.
+## Lokale Entwicklung
 
-Die Anwendung verbindet:
+### Backend (Python/FastAPI)
+```bash
+# Abhängigkeiten installieren
+pip install -r requirements.txt
 
-- 📚 Wissensdatenbank
-- 🔎 Recherche
-- 📝 Ausbildungsnachweise
-- 🧠 Prüfungsvorbereitung
-- 🤖 KI-Assistent
-- 📄 Dokumentengenerierung
+# Backend starten
+uvicorn backend.main:app --reload
 
-in einer einzigen modular aufgebauten Plattform.
+# Tests ausführen
+pytest tests/
+```
 
----
+### Frontend (Flutter)
 
-# Projektvision
+```Bash
 
-Azubi-Mate soll ein digitaler Begleiter für die gesamte Ausbildungszeit sein.
+cd frontend
 
-Die Anwendung unterstützt Auszubildende dabei:
+# Abhängigkeiten laden
+flutter pub get
 
-- Wissen strukturiert aufzubauen
-- Ausbildungsinhalte zu verstehen
-- Berichtshefte zu erstellen
-- Prüfungen vorzubereiten
-- Lernfortschritte zu verfolgen
+# App starten
+flutter run
 
----
-
-# Architektur
-
-Azubi-Mate basiert auf einer modularen Architektur.
-
-Grundprinzip:
+# Tests ausführen
+flutter test
+```
