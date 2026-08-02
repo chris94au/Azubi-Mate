@@ -17,3 +17,22 @@ class KnowledgeSearchQueryDTO(BaseDTO):
     query: str
     category: Optional[str] = None
     limit: int = 10
+
+class ResearchQueryDTO(BaseDTO):
+    query: str
+    category: Optional[str] = None
+    include_external: bool = True
+    limit: int = 5
+
+class SourceEvaluationDTO(BaseDTO):
+    source_name: str
+    reliability_score: float
+    notes: str
+
+class ResearchResultDTO(BaseDTO):
+    query: str
+    summary: str
+    local_results: List[KnowledgeItemDTO] = []
+    external_sources: List[str] = []
+    evaluations: List[SourceEvaluationDTO] = []
+    found_locally: bool
