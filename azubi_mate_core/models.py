@@ -1,3 +1,4 @@
+# azubi_mate_core/models.py
 from pydantic import BaseModel, ConfigDict
 
 class CoreModel(BaseModel):
