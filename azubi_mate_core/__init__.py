@@ -4,8 +4,20 @@ Azubi-Mate Core Module
 Contains shared data types, interfaces, base classes, exceptions, and configuration.
 """
 from .models import CoreModel, KnowledgeItemModel
-from .dto import BaseDTO, KnowledgeItemDTO, KnowledgeSearchQueryDTO
-from .interfaces import BaseEngine, BaseRepository, KnowledgeEngineInterface
+from .dto import (
+    BaseDTO,
+    KnowledgeItemDTO,
+    KnowledgeSearchQueryDTO,
+    ResearchQueryDTO,
+    SourceEvaluationDTO,
+    ResearchResultDTO,
+)
+from .interfaces import (
+    BaseEngine,
+    BaseRepository,
+    KnowledgeEngineInterface,
+    ResearchEngineInterface,
+)
 from .exceptions import (
     AzubiMateException,
     ConfigurationError,
@@ -20,9 +32,13 @@ __all__ = [
     "BaseDTO",
     "KnowledgeItemDTO",
     "KnowledgeSearchQueryDTO",
+    "ResearchQueryDTO",
+    "SourceEvaluationDTO",
+    "ResearchResultDTO",
     "BaseEngine",
     "BaseRepository",
     "KnowledgeEngineInterface",
+    "ResearchEngineInterface",
     "AzubiMateException",
     "ConfigurationError",
     "NotFoundError",

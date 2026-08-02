@@ -80,6 +80,8 @@ frontend/
   pubspec.yaml
 knowledge_engine/
   __init__.py
+  engine.py
+  repository.py
 learning_engine/
   __init__.py
 ocr_engine/
@@ -98,6 +100,7 @@ tests/
   test_phase_1.py
   test_phase_2.py
   test_phase_3.py
+  test_phase_4.py
 voice_engine/
   __init__.py
 .gitignore
@@ -1874,10 +1877,201 @@ flutter:
   uses-material-design: true
 </file>
 
-<file path="knowledge_engine/__init__.py">
-"""
-Azubi-Mate Knowledge Engine
-"""
+<file path="knowledge_engine/engine.py">
+# knowledge_engine/engine.py
+from typing import Any, Dict, List, Optional
+from azubi_mate_core import KnowledgeEngineInterface, KnowledgeItemDTO, KnowledgeSearchQueryDTO, logger
+from knowledge_engine.repository import KnowledgeRepository
+
+class KnowledgeEngine(KnowledgeEngineInterface):
+    """Implementation of the Knowledge Engine."""
+
+    def __init__(self, repository: Optional[KnowledgeRepository] = None) -> None:
+        self.repository = repository or KnowledgeRepository()
+        self._initialized = False
+
+    def initialize(self) -> None:
+        logger.info("Initializing Knowledge Engine...")
+        self._initialized = True
+        logger.info("Knowledge Engine initialized successfully.")
+
+    def get_status(self) -> Dict[str, Any]:
+        items_count = len(self.repository.list_all())
+        return {
+            "engine": "KnowledgeEngine",
+            "status": "active" if self._initialized else "inactive",
+            "items_count": items_count,
+        }
+
+    def add_knowledge(self, item: KnowledgeItemDTO) -> KnowledgeItemDTO:
+        logger.info(f"Adding knowledge item: {item.id} - {item.title}")
+        return self.repository.add(item)
+
+    def get_knowledge(self, item_id: str) -> Optional[KnowledgeItemDTO]:
+        return self.repository.get_by_id(item_id)
+
+    def search_knowledge(self, query: KnowledgeSearchQueryDTO) -> List[KnowledgeItemDTO]:
+        logger.info(f"Searching knowledge with query: '{query.query}', category: {query.category}")
+        return self.repository.search(query)
+
+    def list_knowledge(self) -> List[KnowledgeItemDTO]:
+        return self.repository.list_all()
+</file>
+
+<file path="knowledge_engine/repository.py">
+# knowledge_engine/repository.py
+import json
+from typing import List, Optional
+from azubi_mate_core import BaseRepository, ValidationException
+from azubi_mate_core.dto import KnowledgeItemDTO, KnowledgeSearchQueryDTO
+from backend.database import db_manager
+
+class KnowledgeRepository(BaseRepository[KnowledgeItemDTO]):
+    """SQLite repository for Knowledge items."""
+
+    def __init__(self) -> None:
+        self._init_table()
+
+    def _init_table(self) -> None:
+        conn = db_manager.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS knowledge_items (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    category TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    tags TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            raise ValidationException(f"Failed to initialize knowledge table: {e}")
+        finally:
+            conn.close()
+
+    def add(self, entity: KnowledgeItemDTO) -> KnowledgeItemDTO:
+        if not entity.id or not entity.title or not entity.category:
+            raise ValidationException("Knowledge item must have id, title, and category.")
+        
+        conn = db_manager.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO knowledge_items (id, title, category, content, tags)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    title = excluded.title,
+                    category = excluded.category,
+                    content = excluded.content,
+                    tags = excluded.tags
+                """,
+                (entity.id, entity.title, entity.category, entity.content, json.dumps(entity.tags))
+            )
+            conn.commit()
+            return entity
+        except Exception as e:
+            conn.rollback()
+            raise ValidationException(f"Failed to save knowledge item: {e}")
+        finally:
+            conn.close()
+
+    def get_by_id(self, entity_id: str) -> Optional[KnowledgeItemDTO]:
+        conn = db_manager.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, title, category, content, tags FROM knowledge_items WHERE id = ?", (entity_id,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return KnowledgeItemDTO(
+                id=row["id"],
+                title=row["title"],
+                category=row["category"],
+                content=row["content"],
+                tags=json.loads(row["tags"])
+            )
+        finally:
+            conn.close()
+
+    def list_all(self) -> List[KnowledgeItemDTO]:
+        conn = db_manager.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, title, category, content, tags FROM knowledge_items")
+            rows = cursor.fetchall()
+            items = []
+            for row in rows:
+                items.append(
+                    KnowledgeItemDTO(
+                        id=row["id"],
+                        title=row["title"],
+                        category=row["category"],
+                        content=row["content"],
+                        tags=json.loads(row["tags"])
+                    )
+                )
+            return items
+        finally:
+            conn.close()
+
+    def delete(self, entity_id: str) -> bool:
+        conn = db_manager.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM knowledge_items WHERE id = ?", (entity_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            raise ValidationException(f"Failed to delete knowledge item: {e}")
+        finally:
+            conn.close()
+
+    def search(self, query_dto: KnowledgeSearchQueryDTO) -> List[KnowledgeItemDTO]:
+        conn = db_manager.get_connection()
+        try:
+            cursor = conn.cursor()
+            search_term = f"%{query_dto.query}%"
+            if query_dto.category:
+                cursor.execute(
+                    """
+                    SELECT id, title, category, content, tags 
+                    FROM knowledge_items 
+                    WHERE category = ? AND (title LIKE ? OR content LIKE ? OR tags LIKE ?)
+                    LIMIT ?
+                    """,
+                    (query_dto.category, search_term, search_term, search_term, query_dto.limit)
+                )
+            else:
+                cursor.execute(
+                    """
+                    SELECT id, title, category, content, tags 
+                    FROM knowledge_items 
+                    WHERE title LIKE ? OR content LIKE ? OR tags LIKE ?
+                    LIMIT ?
+                    """,
+                    (search_term, search_term, search_term, query_dto.limit)
+                )
+            rows = cursor.fetchall()
+            items = []
+            for row in rows:
+                items.append(
+                    KnowledgeItemDTO(
+                        id=row["id"],
+                        title=row["title"],
+                        category=row["category"],
+                        content=row["content"],
+                        tags=json.loads(row["tags"])
+                    )
+                )
+            return items
+        finally:
+            conn.close()
 </file>
 
 <file path="learning_engine/__init__.py">
@@ -2067,6 +2261,10 @@ def test_repository_error_handling(tmp_path):
         database.db_manager.db_path = original_path
 </file>
 
+<file path="tests/test_phase_4.py">
+
+</file>
+
 <file path="voice_engine/__init__.py">
 
 </file>
@@ -2114,15 +2312,6 @@ pytest>=7.4.3
 httpx>=0.25.1
 </file>
 
-<file path="azubi_mate_core/dto.py">
-# azubi_mate_core/dto.py
-from pydantic import BaseModel, ConfigDict
-
-class BaseDTO(BaseModel):
-    """Base Data Transfer Object for all module communications."""
-    model_config = ConfigDict(from_attributes=True)
-</file>
-
 <file path="azubi_mate_core/exceptions.py">
 # azubi_mate_core/exceptions.py
 class AzubiMateException(Exception):
@@ -2145,15 +2334,6 @@ class NotFoundError(AzubiMateException):
 class ValidationException(AzubiMateException):
     """Raised when validation fails for input data or domain logic."""
     pass
-</file>
-
-<file path="azubi_mate_core/models.py">
-# azubi_mate_core/models.py
-from pydantic import BaseModel, ConfigDict
-
-class CoreModel(BaseModel):
-    """Base model for all internal domain models."""
-    model_config = ConfigDict(from_attributes=True)
 </file>
 
 <file path="backend/__init__.py">
@@ -2191,6 +2371,20 @@ def health_check() -> dict[str, str]:
         "app": config.app_name, 
         "version": config.version,
     }
+</file>
+
+<file path="knowledge_engine/__init__.py">
+# knowledge_engine/__init__.py
+"""
+Azubi-Mate Knowledge Engine
+"""
+from knowledge_engine.engine import KnowledgeEngine
+from knowledge_engine.repository import KnowledgeRepository
+
+__all__ = [
+    "KnowledgeEngine",
+    "KnowledgeRepository",
+]
 </file>
 
 <file path="tests/test_phase_0.py">
@@ -2255,39 +2449,6 @@ flutter test
 ```
 </file>
 
-<file path="azubi_mate_core/__init__.py">
-# azubi_mate_core/__init__.py
-"""
-Azubi-Mate Core Module
-Contains shared data types, interfaces, base classes, exceptions, and configuration.
-"""
-from .models import CoreModel
-from .dto import BaseDTO
-from .interfaces import BaseEngine, BaseRepository
-from .exceptions import (
-    AzubiMateException,
-    ConfigurationError,
-    NotFoundError,
-    ValidationException,
-)
-from .config import config, AppConfig, logger, setup_logging
-
-__all__ = [
-    "CoreModel",
-    "BaseDTO",
-    "BaseEngine",
-    "BaseRepository",
-    "AzubiMateException",
-    "ConfigurationError",
-    "NotFoundError",
-    "ValidationException",
-    "config",
-    "AppConfig",
-    "logger",
-    "setup_logging",
-]
-</file>
-
 <file path="azubi_mate_core/config.py">
 # azubi_mate_core/config.py
 import logging
@@ -2316,10 +2477,87 @@ def setup_logging() -> logging.Logger:
 logger = setup_logging()
 </file>
 
+<file path="azubi_mate_core/dto.py">
+# azubi_mate_core/dto.py
+from pydantic import BaseModel, ConfigDict
+from typing import List, Optional
+
+class BaseDTO(BaseModel):
+    """Base Data Transfer Object for all module communications."""
+    model_config = ConfigDict(from_attributes=True)
+
+class KnowledgeItemDTO(BaseDTO):
+    id: str
+    title: str
+    category: str
+    content: str
+    tags: List[str] = []
+
+class KnowledgeSearchQueryDTO(BaseDTO):
+    query: str
+    category: Optional[str] = None
+    limit: int = 10
+</file>
+
+<file path="azubi_mate_core/models.py">
+# azubi_mate_core/models.py
+from pydantic import BaseModel, ConfigDict
+from typing import List, Optional
+
+class CoreModel(BaseModel):
+    """Base model for all internal domain models."""
+    model_config = ConfigDict(from_attributes=True)
+
+class KnowledgeItemModel(CoreModel):
+    id: str
+    title: str
+    category: str  # "Ausbildungsordnung", "Lerninhalt", "Fachwissen", "Gesetz", "Glossar"
+    content: str
+    tags: List[str] = []
+</file>
+
+<file path="azubi_mate_core/__init__.py">
+# azubi_mate_core/__init__.py
+"""
+Azubi-Mate Core Module
+Contains shared data types, interfaces, base classes, exceptions, and configuration.
+"""
+from .models import CoreModel, KnowledgeItemModel
+from .dto import BaseDTO, KnowledgeItemDTO, KnowledgeSearchQueryDTO
+from .interfaces import BaseEngine, BaseRepository, KnowledgeEngineInterface
+from .exceptions import (
+    AzubiMateException,
+    ConfigurationError,
+    NotFoundError,
+    ValidationException,
+)
+from .config import config, AppConfig, logger, setup_logging
+
+__all__ = [
+    "CoreModel",
+    "KnowledgeItemModel",
+    "BaseDTO",
+    "KnowledgeItemDTO",
+    "KnowledgeSearchQueryDTO",
+    "BaseEngine",
+    "BaseRepository",
+    "KnowledgeEngineInterface",
+    "AzubiMateException",
+    "ConfigurationError",
+    "NotFoundError",
+    "ValidationException",
+    "config",
+    "AppConfig",
+    "logger",
+    "setup_logging",
+]
+</file>
+
 <file path="azubi_mate_core/interfaces.py">
 # azubi_mate_core/interfaces.py
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generic, List, Optional, TypeVar
+from .dto import KnowledgeItemDTO, KnowledgeSearchQueryDTO
 
 class BaseEngine(ABC):
     """Base interface for all engines in Azubi-Mate."""
@@ -2357,6 +2595,29 @@ class BaseRepository(ABC, Generic[T]):
     @abstractmethod
     def delete(self, entity_id: str) -> bool:
         """Deletes an entity by its unique identifier."""
+        pass
+
+class KnowledgeEngineInterface(BaseEngine, ABC):
+    """Interface for the Knowledge Engine."""
+
+    @abstractmethod
+    def add_knowledge(self, item: KnowledgeItemDTO) -> KnowledgeItemDTO:
+        """Adds or updates a knowledge item."""
+        pass
+
+    @abstractmethod
+    def get_knowledge(self, item_id: str) -> Optional[KnowledgeItemDTO]:
+        """Retrieves a knowledge item by ID."""
+        pass
+
+    @abstractmethod
+    def search_knowledge(self, query: KnowledgeSearchQueryDTO) -> List[KnowledgeItemDTO]:
+        """Searches knowledge items based on query and category."""
+        pass
+
+    @abstractmethod
+    def list_knowledge(self) -> List[KnowledgeItemDTO]:
+        """Lists all knowledge items."""
         pass
 </file>
 
