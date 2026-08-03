@@ -1,10 +1,11 @@
 # backend/dependencies.py
 import logging
 import os
-from azubi_mate_core import logger as core_logger, LLMProvider, ReportEngineInterface, DocumentEngineInterface
+from azubi_mate_core import logger as core_logger, LLMProvider, ReportEngineInterface, DocumentEngineInterface, ExamEngineInterface
 from backend.ai import OpenAIProvider, OllamaProvider, GeminiProvider, MockLLMProvider
 from report_engine import ReportEngine
 from document_engine import DocumentEngine
+from exam_engine import ExamEngine
 
 def get_logger() -> logging.Logger:
     """Dependency to provide the application logger."""
@@ -32,5 +33,12 @@ def get_report_engine() -> ReportEngineInterface:
 def get_document_engine() -> DocumentEngineInterface:
     """Dependency to provide the Document Engine."""
     engine = DocumentEngine()
+    engine.initialize()
+    return engine
+
+def get_exam_engine() -> ExamEngineInterface:
+    """Dependency to provide the Exam Engine."""
+    llm = get_llm_provider()
+    engine = ExamEngine(llm)
     engine.initialize()
     return engine
