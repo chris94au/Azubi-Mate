@@ -1,7 +1,14 @@
 # azubi_mate_core/interfaces.py
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generic, List, Optional, TypeVar
-from .dto import KnowledgeItemDTO, KnowledgeSearchQueryDTO
+from .dto import (
+    KnowledgeItemDTO,
+    KnowledgeSearchQueryDTO,
+    ResearchQueryDTO,
+    ResearchResultDTO,
+    LLMRequestDTO,
+    LLMResponseDTO,
+)
 
 class BaseEngine(ABC):
     """Base interface for all engines in Azubi-Mate."""
@@ -62,4 +69,20 @@ class KnowledgeEngineInterface(BaseEngine, ABC):
     @abstractmethod
     def list_knowledge(self) -> List[KnowledgeItemDTO]:
         """Lists all knowledge items."""
+        pass
+
+class ResearchEngineInterface(BaseEngine, ABC):
+    """Interface for the Research Engine."""
+
+    @abstractmethod
+    def research(self, query: ResearchQueryDTO) -> ResearchResultDTO:
+        """Conducts research across local knowledge base and external sources if needed."""
+        pass
+
+class LLMProvider(ABC):
+    """Interface for LLM providers (Ollama, OpenAI, Gemini, etc.)."""
+
+    @abstractmethod
+    def generate(self, request: LLMRequestDTO) -> LLMResponseDTO:
+        """Generates a response from the LLM provider."""
         pass

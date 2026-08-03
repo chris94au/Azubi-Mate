@@ -22,3 +22,7 @@ build/
 .idea/
 *.swp
 .DS_Store
+
+# doc
+*.log
+doc

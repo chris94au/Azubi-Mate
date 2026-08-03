@@ -19,3 +19,8 @@ class NotFoundError(AzubiMateException):
 class ValidationException(AzubiMateException):
     """Raised when validation fails for input data or domain logic."""
     pass
+
+
+class LLMException(AzubiMateException):
+    """Raised when an error occurs during LLM interaction."""
+    pass
