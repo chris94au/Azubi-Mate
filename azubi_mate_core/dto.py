@@ -48,3 +48,39 @@ class LLMResponseDTO(BaseDTO):
     model: str
     provider: str
     usage: Optional[dict] = None
+
+class ReportRequestDTO(BaseDTO):
+    report_type: str  # "tagesbericht", "wochenbericht", "monatsbericht"
+    bullet_points: List[str]
+    trainee_name: Optional[str] = None
+    department: Optional[str] = None
+    date: Optional[str] = None
+    week_number: Optional[int] = None
+    month: Optional[str] = None
+    year: Optional[int] = None
+
+class ReportDTO(BaseDTO):
+    id: str
+    report_type: str
+    title: str
+    activities: List[str] = []
+    learning_content: List[str] = []
+    technical_terms: List[str] = []
+    summary: str
+    date: Optional[str] = None
+    week_number: Optional[int] = None
+    month: Optional[str] = None
+    year: Optional[int] = None
+    status: str = "draft"  # "draft", "confirmed"
+
+class DocumentExportRequestDTO(BaseDTO):
+    content: str
+    title: str
+    format: str = "pdf"  # "pdf", "docx", "txt"
+    metadata: dict = {}
+
+class DocumentExportResultDTO(BaseDTO):
+    file_path: Optional[str] = None
+    format: str
+    success: bool
+    message: str
