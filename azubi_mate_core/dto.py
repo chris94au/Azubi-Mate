@@ -125,3 +125,43 @@ class ExamProgressDTO(BaseDTO):
     correct_answers: int = 0
     average_score: float = 0.0
     history: List[dict] = []
+
+class LearningPlanRequestDTO(BaseDTO):
+    trainee_name: Optional[str] = None
+    profession: Optional[str] = None
+    school_subjects: List[str] = []
+    strengths: List[str] = []
+    weaknesses: List[str] = []
+    exam_date: Optional[str] = None
+    target_topics: List[str] = []
+
+class LearningPlanItemDTO(BaseDTO):
+    topic: str
+    priority: str  # "high", "medium", "low"
+    suggested_actions: List[str] = []
+    status: str = "open"  # "open", "in_progress", "completed"
+
+class LearningPlanDTO(BaseDTO):
+    plan_id: str
+    title: str
+    profession: Optional[str] = None
+    items: List[LearningPlanItemDTO] = []
+    summary: str
+    created_at: Optional[str] = None
+
+class WeaknessAnalysisDTO(BaseDTO):
+    identified_weaknesses: List[str] = []
+    recommended_focus_areas: List[str] = []
+    analysis_notes: str
+
+class LearningProgressUpdateDTO(BaseDTO):
+    plan_id: str
+    topic: str
+    status: str  # "open", "in_progress", "completed"
+
+class LearningProgressDTO(BaseDTO):
+    plan_id: str
+    completed_items: int
+    total_items: int
+    completion_rate: float
+    items_status: Dict[str, str] = {}
