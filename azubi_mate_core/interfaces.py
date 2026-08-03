@@ -18,6 +18,11 @@ from .dto import (
     ExamEvaluationDTO,
     ExamSessionDTO,
     ExamProgressDTO,
+    LearningPlanRequestDTO,
+    LearningPlanDTO,
+    WeaknessAnalysisDTO,
+    LearningProgressUpdateDTO,
+    LearningProgressDTO,
 )
 
 class BaseEngine(ABC):
@@ -141,6 +146,34 @@ class ExamEngineInterface(BaseEngine, ABC):
     @abstractmethod
     def get_progress(self) -> ExamProgressDTO:
         """Retrieves learning and exam progress statistics."""
+        pass
+
+class LearningEngineInterface(BaseEngine, ABC):
+    """Interface for the Learning Engine."""
+
+    @abstractmethod
+    def generate_learning_plan(self, request: LearningPlanRequestDTO) -> LearningPlanDTO:
+        """Generates an individual learning plan."""
+        pass
+
+    @abstractmethod
+    def analyze_weaknesses(self, request: LearningPlanRequestDTO) -> WeaknessAnalysisDTO:
+        """Analyzes weaknesses and recommends focus areas."""
+        pass
+
+    @abstractmethod
+    def update_progress(self, update: LearningProgressUpdateDTO) -> LearningProgressDTO:
+        """Updates progress of a learning plan item."""
+        pass
+
+    @abstractmethod
+    def get_learning_plan(self, plan_id: str) -> Optional[LearningPlanDTO]:
+        """Retrieves a learning plan by ID."""
+        pass
+
+    @abstractmethod
+    def list_learning_plans(self) -> List[LearningPlanDTO]:
+        """Lists all learning plans."""
         pass
 
 class LLMProvider(ABC):

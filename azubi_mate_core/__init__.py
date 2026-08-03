@@ -23,6 +23,12 @@ from .dto import (
     ExamEvaluationDTO,
     ExamSessionDTO,
     ExamProgressDTO,
+    LearningPlanRequestDTO,
+    LearningPlanItemDTO,
+    LearningPlanDTO,
+    WeaknessAnalysisDTO,
+    LearningProgressUpdateDTO,
+    LearningProgressDTO,
 )
 from .interfaces import (
     BaseEngine,
@@ -32,6 +38,7 @@ from .interfaces import (
     ReportEngineInterface,
     DocumentEngineInterface,
     ExamEngineInterface,
+    LearningEngineInterface,
     LLMProvider,
 )
 from .exceptions import (
@@ -64,6 +71,12 @@ __all__ = [
     "ExamEvaluationDTO",
     "ExamSessionDTO",
     "ExamProgressDTO",
+    "LearningPlanRequestDTO",
+    "LearningPlanItemDTO",
+    "LearningPlanDTO",
+    "WeaknessAnalysisDTO",
+    "LearningProgressUpdateDTO",
+    "LearningProgressDTO",
     "BaseEngine",
     "BaseRepository",
     "KnowledgeEngineInterface",
@@ -71,6 +84,7 @@ __all__ = [
     "ReportEngineInterface",
     "DocumentEngineInterface",
     "ExamEngineInterface",
+    "LearningEngineInterface",
     "LLMProvider",
     "AzubiMateException",
     "ConfigurationError",

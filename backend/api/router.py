@@ -14,11 +14,17 @@ from azubi_mate_core import (
     ExamSubmissionDTO,
     ExamEvaluationDTO,
     ExamProgressDTO,
+    LearningPlanRequestDTO,
+    LearningPlanDTO,
+    WeaknessAnalysisDTO,
+    LearningProgressUpdateDTO,
+    LearningProgressDTO,
     ReportEngineInterface,
     DocumentEngineInterface,
     ExamEngineInterface,
+    LearningEngineInterface,
 )
-from backend.dependencies import get_report_engine, get_document_engine, get_exam_engine
+from backend.dependencies import get_report_engine, get_document_engine, get_exam_engine, get_learning_engine
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -125,3 +131,45 @@ def get_exam_progress(
 ) -> ExamProgressDTO:
     """Retrieves exam and learning progress."""
     return exam_engine.get_progress()
+
+@api_router.post("/learning/plans/generate", response_model=LearningPlanDTO)
+def generate_learning_plan(
+    request: LearningPlanRequestDTO,
+    learning_engine: LearningEngineInterface = Depends(get_learning_engine)
+) -> LearningPlanDTO:
+    """Generates an individual learning plan."""
+    return learning_engine.generate_learning_plan(request)
+
+@api_router.post("/learning/analyze", response_model=WeaknessAnalysisDTO)
+def analyze_weaknesses(
+    request: LearningPlanRequestDTO,
+    learning_engine: LearningEngineInterface = Depends(get_learning_engine)
+) -> WeaknessAnalysisDTO:
+    """Analyzes weaknesses and recommends focus areas."""
+    return learning_engine.analyze_weaknesses(request)
+
+@api_router.post("/learning/progress", response_model=LearningProgressDTO)
+def update_learning_progress(
+    update: LearningProgressUpdateDTO,
+    learning_engine: LearningEngineInterface = Depends(get_learning_engine)
+) -> LearningProgressDTO:
+    """Updates progress of a learning plan item."""
+    return learning_engine.update_progress(update)
+
+@api_router.get("/learning/plans/{plan_id}", response_model=LearningPlanDTO)
+def get_learning_plan(
+    plan_id: str,
+    learning_engine: LearningEngineInterface = Depends(get_learning_engine)
+) -> LearningPlanDTO:
+    """Retrieves a learning plan by ID."""
+    plan = learning_engine.get_learning_plan(plan_id)
+    if not plan:
+        raise NotFoundError(f"Learning plan with id {plan_id} not found.")
+    return plan
+
+@api_router.get("/learning/plans", response_model=list[LearningPlanDTO])
+def list_learning_plans(
+    learning_engine: LearningEngineInterface = Depends(get_learning_engine)
+) -> list[LearningPlanDTO]:
+    """Lists all learning plans."""
+    return learning_engine.list_learning_plans()
