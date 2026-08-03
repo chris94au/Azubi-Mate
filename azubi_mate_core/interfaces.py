@@ -8,6 +8,10 @@ from .dto import (
     ResearchResultDTO,
     LLMRequestDTO,
     LLMResponseDTO,
+    ReportRequestDTO,
+    ReportDTO,
+    DocumentExportRequestDTO,
+    DocumentExportResultDTO,
 )
 
 class BaseEngine(ABC):
@@ -77,6 +81,37 @@ class ResearchEngineInterface(BaseEngine, ABC):
     @abstractmethod
     def research(self, query: ResearchQueryDTO) -> ResearchResultDTO:
         """Conducts research across local knowledge base and external sources if needed."""
+        pass
+
+class ReportEngineInterface(BaseEngine, ABC):
+    """Interface for the Report Engine."""
+
+    @abstractmethod
+    def generate_report(self, request: ReportRequestDTO) -> ReportDTO:
+        """Generates an IHK-compliant training report from bullet points and analysis."""
+        pass
+
+    @abstractmethod
+    def confirm_report(self, report_id: str) -> ReportDTO:
+        """Confirms a report draft."""
+        pass
+
+    @abstractmethod
+    def get_report(self, report_id: str) -> Optional[ReportDTO]:
+        """Retrieves a report by ID."""
+        pass
+
+    @abstractmethod
+    def list_reports(self) -> List[ReportDTO]:
+        """Lists all reports."""
+        pass
+
+class DocumentEngineInterface(BaseEngine, ABC):
+    """Interface for the Document Engine."""
+
+    @abstractmethod
+    def export_document(self, request: DocumentExportRequestDTO) -> DocumentExportResultDTO:
+        """Exports a document in the requested format (PDF, Word, etc.)."""
         pass
 
 class LLMProvider(ABC):
