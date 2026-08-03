@@ -1,6 +1,6 @@
 # azubi_mate_core/dto.py
 from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 class BaseDTO(BaseModel):
     """Base Data Transfer Object for all module communications."""
@@ -84,3 +84,44 @@ class DocumentExportResultDTO(BaseDTO):
     format: str
     success: bool
     message: str
+
+class ExamQuestionDTO(BaseDTO):
+    id: str
+    question_type: str  # "multiple_choice", "flashcard", "open"
+    question_text: str
+    options: List[str] = []
+    correct_answer: Optional[str] = None
+    explanation: Optional[str] = None
+
+class ExamGenerateRequestDTO(BaseDTO):
+    topic: Optional[str] = None
+    category: Optional[str] = None
+    question_type: Optional[str] = None  # "multiple_choice", "flashcard", "open", "simulation"
+    count: int = 5
+
+class ExamSubmissionDTO(BaseDTO):
+    question_id: str
+    answer: str
+
+class ExamEvaluationDTO(BaseDTO):
+    question_id: str
+    correct: bool
+    score: float
+    feedback: str
+    correct_answer: Optional[str] = None
+
+class ExamSessionDTO(BaseDTO):
+    session_id: str
+    title: str
+    questions: List[ExamQuestionDTO] = []
+    answers: Dict[str, str] = {}
+    evaluations: List[ExamEvaluationDTO] = []
+    score: float = 0.0
+    completed: bool = False
+
+class ExamProgressDTO(BaseDTO):
+    total_sessions: int = 0
+    total_answered: int = 0
+    correct_answers: int = 0
+    average_score: float = 0.0
+    history: List[dict] = []

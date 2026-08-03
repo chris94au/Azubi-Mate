@@ -12,6 +12,12 @@ from .dto import (
     ReportDTO,
     DocumentExportRequestDTO,
     DocumentExportResultDTO,
+    ExamQuestionDTO,
+    ExamGenerateRequestDTO,
+    ExamSubmissionDTO,
+    ExamEvaluationDTO,
+    ExamSessionDTO,
+    ExamProgressDTO,
 )
 
 class BaseEngine(ABC):
@@ -112,6 +118,29 @@ class DocumentEngineInterface(BaseEngine, ABC):
     @abstractmethod
     def export_document(self, request: DocumentExportRequestDTO) -> DocumentExportResultDTO:
         """Exports a document in the requested format (PDF, Word, etc.)."""
+        pass
+
+class ExamEngineInterface(BaseEngine, ABC):
+    """Interface for the Exam Engine."""
+
+    @abstractmethod
+    def generate_exam(self, request: ExamGenerateRequestDTO) -> ExamSessionDTO:
+        """Generates exam questions, flashcards, or a simulation."""
+        pass
+
+    @abstractmethod
+    def submit_answer(self, session_id: str, submission: ExamSubmissionDTO) -> ExamEvaluationDTO:
+        """Submits and evaluates an answer for a question in a session."""
+        pass
+
+    @abstractmethod
+    def get_session(self, session_id: str) -> Optional[ExamSessionDTO]:
+        """Retrieves an exam session by ID."""
+        pass
+
+    @abstractmethod
+    def get_progress(self) -> ExamProgressDTO:
+        """Retrieves learning and exam progress statistics."""
         pass
 
 class LLMProvider(ABC):
