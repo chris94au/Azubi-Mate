@@ -1,4 +1,6 @@
+// frontend/lib/main.dart
 import 'package:flutter/material.dart';
+import 'screens/dashboard_screen.dart';
 
 void main() {
   runApp(const AzubiMateApp());
@@ -16,22 +18,6 @@ class AzubiMateApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const DashboardScreen(),
-    );
-  }
-}
-
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Azubi-Mate Dashboard'),
-      ),
-      body: const Center(
-        child: Text('Willkommen bei Azubi-Mate!'),
-      ),
     );
   }
 }

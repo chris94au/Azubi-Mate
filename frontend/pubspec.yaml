@@ -1,7 +1,7 @@
 name: azubi_mate
-description: "Azubi-Mate: KI-gestützte Mobile-App für Auszubildende."
+description: "Azubi-Mate Flutter Frontend Anwendung"
 publish_to: 'none'
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.1.0
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
