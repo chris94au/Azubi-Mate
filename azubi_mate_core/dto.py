@@ -36,3 +36,15 @@ class ResearchResultDTO(BaseDTO):
     external_sources: List[str] = []
     evaluations: List[SourceEvaluationDTO] = []
     found_locally: bool
+
+class LLMRequestDTO(BaseDTO):
+    prompt: str
+    system_prompt: Optional[str] = None
+    temperature: float = 0.7
+    max_tokens: Optional[int] = None
+
+class LLMResponseDTO(BaseDTO):
+    text: str
+    model: str
+    provider: str
+    usage: Optional[dict] = None

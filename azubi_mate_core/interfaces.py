@@ -6,6 +6,8 @@ from .dto import (
     KnowledgeSearchQueryDTO,
     ResearchQueryDTO,
     ResearchResultDTO,
+    LLMRequestDTO,
+    LLMResponseDTO,
 )
 
 class BaseEngine(ABC):
@@ -75,4 +77,12 @@ class ResearchEngineInterface(BaseEngine, ABC):
     @abstractmethod
     def research(self, query: ResearchQueryDTO) -> ResearchResultDTO:
         """Conducts research across local knowledge base and external sources if needed."""
+        pass
+
+class LLMProvider(ABC):
+    """Interface for LLM providers (Ollama, OpenAI, Gemini, etc.)."""
+
+    @abstractmethod
+    def generate(self, request: LLMRequestDTO) -> LLMResponseDTO:
+        """Generates a response from the LLM provider."""
         pass

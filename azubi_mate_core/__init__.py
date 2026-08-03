@@ -11,18 +11,22 @@ from .dto import (
     ResearchQueryDTO,
     SourceEvaluationDTO,
     ResearchResultDTO,
+    LLMRequestDTO,
+    LLMResponseDTO,
 )
 from .interfaces import (
     BaseEngine,
     BaseRepository,
     KnowledgeEngineInterface,
     ResearchEngineInterface,
+    LLMProvider,
 )
 from .exceptions import (
     AzubiMateException,
     ConfigurationError,
     NotFoundError,
     ValidationException,
+    LLMException,
 )
 from .config import config, AppConfig, logger, setup_logging
 
@@ -35,14 +39,18 @@ __all__ = [
     "ResearchQueryDTO",
     "SourceEvaluationDTO",
     "ResearchResultDTO",
+    "LLMRequestDTO",
+    "LLMResponseDTO",
     "BaseEngine",
     "BaseRepository",
     "KnowledgeEngineInterface",
     "ResearchEngineInterface",
+    "LLMProvider",
     "AzubiMateException",
     "ConfigurationError",
     "NotFoundError",
     "ValidationException",
+    "LLMException",
     "config",
     "AppConfig",
     "logger",
